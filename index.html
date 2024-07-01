@@ -126,39 +126,20 @@
 
   <script>
     const chords = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const chordProgressions = {
-      'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
-      'D': ['D', 'Em', 'F#m', 'G', 'A', 'Bm', 'C#dim'],
-      'E': ['E', 'F#m', 'G#m', 'A', 'B', 'C#m', 'D#dim'],
-      'F': ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'Edim'],
-      'G': ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'F#dim'],
-      'A': ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'G#dim'],
-      'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#dim']
+    const jazzChords = {
+      'C': ['C', 'Cm', 'C7', 'Cm7', 'Cmaj7', 'Cdim', 'Caug', 'Csus2', 'Csus4', 'C9', 'C11', 'C13'],
+      'C#': ['C#', 'C#m', 'C#7', 'C#m7', 'C#maj7', 'C#dim', 'C#aug', 'C#sus2', 'C#sus4', 'C#9', 'C#11', 'C#13'],
+      'D': ['D', 'Dm', 'D7', 'Dm7', 'Dmaj7', 'Ddim', 'Daug', 'Dsus2', 'Dsus4', 'D9', 'D11', 'D13'],
+      'D#': ['D#', 'D#m', 'D#7', 'D#m7', 'D#maj7', 'D#dim', 'D#aug', 'D#sus2', 'D#sus4', 'D#9', 'D#11', 'D#13'],
+      'E': ['E', 'Em', 'E7', 'Em7', 'Emaj7', 'Edim', 'Eaug', 'Esus2', 'Esus4', 'E9', 'E11', 'E13'],
+      'F': ['F', 'Fm', 'F7', 'Fm7', 'Fmaj7', 'Fdim', 'Faug', 'Fsus2', 'Fsus4', 'F9', 'F11', 'F13'],
+      'F#': ['F#', 'F#m', 'F#7', 'F#m7', 'F#maj7', 'F#dim', 'F#aug', 'F#sus2', 'F#sus4', 'F#9', 'F#11', 'F#13'],
+      'G': ['G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'Gdim', 'Gaug', 'Gsus2', 'Gsus4', 'G9', 'G11', 'G13'],
+      'G#': ['G#', 'G#m', 'G#7', 'G#m7', 'G#maj7', 'G#dim', 'G#aug', 'G#sus2', 'G#sus4', 'G#9', 'G#11', 'G#13'],
+      'A': ['A', 'Am', 'A7', 'Am7', 'Amaj7', 'Adim', 'Aaug', 'Asus2', 'Asus4', 'A9', 'A11', 'A13'],
+      'A#': ['A#', 'A#m', 'A#7', 'A#m7', 'A#maj7', 'A#dim', 'A#aug', 'A#sus2', 'A#sus4', 'A#9', 'A#11', 'A#13'],
+      'B': ['B', 'Bm', 'B7', 'Bm7', 'Bmaj7', 'Bdim', 'Baug', 'Bsus2', 'Bsus4', 'B9', 'B11', 'B13']
     };
-
-    const introProgressions = [
-      ['I', 'IV', 'V'],
-      ['I', 'V', 'vi', 'IV'],
-      ['vi', 'IV', 'I', 'V']
-    ];
-
-    const verseProgressions = [
-      ['I', 'IV', 'V'],
-      ['I', 'V', 'vi', 'IV'],
-      ['vi', 'IV', 'I', 'V']
-    ];
-
-    const bridgeProgressions = [
-      ['IV', 'V', 'vi', 'I'],
-      ['ii', 'V', 'I'],
-      ['I', 'vi', 'IV', 'V']
-    ];
-
-    const chorusProgressions = [
-      ['I', 'V', 'vi', 'IV'],
-      ['IV', 'V', 'I'],
-      ['I', 'IV', 'V']
-    ];
 
     let selectedKey = '';
     let capo = 0;
@@ -212,14 +193,22 @@
     }
 
     function suggestNextChords(elementId, chordList) {
-      const keyChords = chordProgressions[selectedKey];
+      const keyChords = jazzChords[selectedKey];
       const lastChord = chordList[chordList.length - 1];
-      const suggestions = lastChord ? keyChords.filter(chord => chord !== lastChord) : keyChords;
+      let suggestions;
+
+      if (lastChord) {
+        const lastChordBase = lastChord.replace(/[^A-G#]/g, '');
+        const lastChordType = lastChord.replace(/[A-G#]/g, '');
+        suggestions = keyChords.filter(chord => chord.startsWith(lastChordBase) || chord.includes(lastChordType));
+      } else {
+        suggestions = keyChords;
+      }
 
       const element = document.getElementById(elementId);
       element.innerHTML = '';
       suggestions.forEach(chord => {
-        const capoChord = chords[(chords.indexOf(chord) + capo + 12) % 12];
+        const capoChord = chords[(chords.indexOf(chord.replace(/[^A-G#]/g, '')) + capo + 12) % 12] + chord.replace(/[A-G#]/g, '');
         const button = document.createElement('button');
         button.className = 'key-button';
         button.textContent = `${chord} (${capoChord})`;
