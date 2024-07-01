@@ -76,6 +76,34 @@
   </div>
   <script>
     const chords = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const chordProgressions = {
+      'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
+      'D': ['D', 'Em', 'F#m', 'G', 'A', 'Bm', 'C#dim'],
+      'E': ['E', 'F#m', 'G#m', 'A', 'B', 'C#m', 'D#dim'],
+      'F': ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'Edim'],
+      'G': ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'F#dim'],
+      'A': ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'G#dim'],
+      'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#dim']
+    };
+
+    const verseProgressions = [
+      ['I', 'IV', 'V'],
+      ['I', 'V', 'vi', 'IV'],
+      ['vi', 'IV', 'I', 'V']
+    ];
+
+    const bridgeProgressions = [
+      ['IV', 'V', 'vi', 'I'],
+      ['ii', 'V', 'I'],
+      ['I', 'vi', 'IV', 'V']
+    ];
+
+    const chorusProgressions = [
+      ['I', 'V', 'vi', 'IV'],
+      ['IV', 'V', 'I'],
+      ['I', 'IV', 'V']
+    ];
+
     let selectedKey = '';
     let capo = 0;
 
@@ -97,33 +125,47 @@
     }
 
     function generateChordProgressions() {
-      const verseChords = getChordProgression(selectedKey);
-      const bridgeChords = getChordProgression(selectedKey);
-      const chorusChords = getChordProgression(selectedKey);
+      const verseChords = getProgressionChords(verseProgressions);
+      const bridgeChords = getProgressionChords(bridgeProgressions);
+      const chorusChords = getProgressionChords(chorusProgressions);
 
       displayChords('verse-chords-list', verseChords);
       displayChords('bridge-chords-list', bridgeChords);
       displayChords('chorus-chords-list', chorusChords);
     }
 
-    function getChordProgression(key) {
-      const keyIndex = chords.indexOf(key);
-      const progression = [];
-      for (let i = 0; i < 10; i++) {
-        const chord = chords[(keyIndex + i) % 12];
-        const capoChord = chords[(chords.indexOf(chord) + capo + 12) % 12];
-        progression.push(`${chord} (${capoChord})`);
-      }
-      return progression;
+    function getProgressionChords(progressionPatterns) {
+      const keyChords = chordProgressions[selectedKey];
+      return progressionPatterns.map(pattern => {
+        return pattern.map(chordSymbol => {
+          const degree = getDegree(chordSymbol);
+          const chord = keyChords[degree - 1];
+          const capoChord = chords[(chords.indexOf(chord) + capo + 12) % 12];
+          return `${chord} (${capoChord})`;
+        });
+      });
     }
 
-    function displayChords(elementId, chords) {
+    function getDegree(symbol) {
+      switch (symbol) {
+        case 'I': return 1;
+        case 'ii': return 2;
+        case 'iii': return 3;
+        case 'IV': return 4;
+        case 'V': return 5;
+        case 'vi': return 6;
+        case 'vii': return 7;
+        default: return 1;
+      }
+    }
+
+    function displayChords(elementId, progressions) {
       const element = document.getElementById(elementId);
       element.innerHTML = '';
-      chords.forEach(chord => {
-        const chordElement = document.createElement('div');
-        chordElement.textContent = chord;
-        element.appendChild(chordElement);
+      progressions.forEach(progression => {
+        const progressionElement = document.createElement('div');
+        progressionElement.textContent = progression.join(' - ');
+        element.appendChild(progressionElement);
       });
     }
   </script>
