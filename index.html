@@ -198,9 +198,8 @@
       let suggestions;
 
       if (lastChord) {
-        const lastChordBase = lastChord.replace(/[^A-G#]/g, '');
-        const lastChordType = lastChord.replace(/[A-G#]/g, '');
-        suggestions = keyChords.filter(chord => chord.startsWith(lastChordBase) || chord.includes(lastChordType));
+        const nextChords = getNextChords(lastChord);
+        suggestions = keyChords.filter(chord => nextChords.includes(chord));
       } else {
         suggestions = keyChords;
       }
@@ -219,6 +218,20 @@
         };
         element.appendChild(button);
       });
+    }
+
+    function getNextChords(currentChord) {
+      const chordBase = currentChord.replace(/[^A-G#]/g, '');
+      switch (chordBase) {
+        case 'C': return ['Dm', 'Em', 'F', 'G', 'Am', 'A7'];
+        case 'Dm': return ['G', 'G7', 'A7', 'F', 'Em'];
+        case 'Em': return ['F', 'G', 'Am', 'B7'];
+        case 'F': return ['G', 'A7', 'Bb'];
+        case 'G': return ['C', 'Am', 'D7', 'E7'];
+        case 'Am': return ['Dm', 'G', 'F'];
+        // 여기서 다른 코드들도 정의할 수 있습니다.
+        default: return [];
+      }
     }
 
     function resetSection(section) {
