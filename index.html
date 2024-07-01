@@ -12,11 +12,11 @@
       text-align: center;
       font-size: 24px;
     }
-    .key-buttons, .capo-buttons, .chord-progressions {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
+    .page {
+      display: none;
+    }
+    .active {
+      display: block;
     }
     button {
       font-size: 18px;
@@ -30,50 +30,76 @@
       background-color: #007BFF;
       color: white;
     }
-    .capo-button {
+    .next-button {
       background-color: #28a745;
       color: white;
-    }
-    .chord-section {
-      margin-bottom: 20px;
+      display: block;
+      margin: 20px auto;
     }
   </style>
 </head>
 <body>
   <h1>작곡 페이지</h1>
-  <div class="key-buttons">
-    <button class="key-button" onclick="selectKey('C')">C</button>
-    <button class="key-button" onclick="selectKey('C#')">C#</button>
-    <button class="key-button" onclick="selectKey('D')">D</button>
-    <button class="key-button" onclick="selectKey('D#')">D#</button>
-    <button class="key-button" onclick="selectKey('E')">E</button>
-    <button class="key-button" onclick="selectKey('F')">F</button>
-    <button class="key-button" onclick="selectKey('F#')">F#</button>
-    <button class="key-button" onclick="selectKey('G')">G</button>
-    <button class="key-button" onclick="selectKey('G#')">G#</button>
-    <button class="key-button" onclick="selectKey('A')">A</button>
-    <button class="key-button" onclick="selectKey('A#')">A#</button>
-    <button class="key-button" onclick="selectKey('B')">B</button>
-  </div>
-  <div class="capo-buttons">
-    <button class="capo-button" onclick="changeCapo(1)">카포 +1</button>
-    <button class="capo-button" onclick="changeCapo(-1)">카포 -1</button>
-  </div>
-  <div id="selected-key" style="text-align: center; margin-bottom: 20px;"></div>
-  <div class="chord-progressions">
-    <div class="chord-section" id="verse-chords">
-      <h2>버스 코드</h2>
-      <div id="verse-chords-list"></div>
+
+  <!-- 키 선택 페이지 -->
+  <div id="select-key-page" class="page active">
+    <h2>키를 선택하세요</h2>
+    <div class="key-buttons">
+      <button class="key-button" onclick="selectKey('C')">C</button>
+      <button class="key-button" onclick="selectKey('C#')">C#</button>
+      <button class="key-button" onclick="selectKey('D')">D</button>
+      <button class="key-button" onclick="selectKey('D#')">D#</button>
+      <button class="key-button" onclick="selectKey('E')">E</button>
+      <button class="key-button" onclick="selectKey('F')">F</button>
+      <button class="key-button" onclick="selectKey('F#')">F#</button>
+      <button class="key-button" onclick="selectKey('G')">G</button>
+      <button class="key-button" onclick="selectKey('G#')">G#</button>
+      <button class="key-button" onclick="selectKey('A')">A</button>
+      <button class="key-button" onclick="selectKey('A#')">A#</button>
+      <button class="key-button" onclick="selectKey('B')">B</button>
     </div>
-    <div class="chord-section" id="bridge-chords">
-      <h2>브릿지 코드</h2>
-      <div id="bridge-chords-list"></div>
+    <div class="capo-buttons">
+      <button class="capo-button" onclick="changeCapo(1)">카포 +1</button>
+      <button class="capo-button" onclick="changeCapo(-1)">카포 -1</button>
     </div>
-    <div class="chord-section" id="chorus-chords">
-      <h2>코러스 코드</h2>
-      <div id="chorus-chords-list"></div>
-    </div>
+    <div id="selected-key" style="text-align: center; margin-bottom: 20px;"></div>
+    <button class="next-button" onclick="goToPage('intro-question-page')">다음</button>
   </div>
+
+  <!-- 인트로 여부 질문 페이지 -->
+  <div id="intro-question-page" class="page">
+    <h2>인트로가 있습니까?</h2>
+    <button class="next-button" onclick="goToPage('intro-page')">예</button>
+    <button class="next-button" onclick="goToPage('verse-page')">아니요</button>
+  </div>
+
+  <!-- 인트로 페이지 -->
+  <div id="intro-page" class="page">
+    <h2>인트로 코드 진행</h2>
+    <div id="intro-chords-list"></div>
+    <button class="next-button" onclick="goToPage('verse-page')">다음</button>
+  </div>
+
+  <!-- 버스 페이지 -->
+  <div id="verse-page" class="page">
+    <h2>버스 코드 진행</h2>
+    <div id="verse-chords-list"></div>
+    <button class="next-button" onclick="goToPage('bridge-page')">다음</button>
+  </div>
+
+  <!-- 브릿지 페이지 -->
+  <div id="bridge-page" class="page">
+    <h2>브릿지 코드 진행</h2>
+    <div id="bridge-chords-list"></div>
+    <button class="next-button" onclick="goToPage('chorus-page')">다음</button>
+  </div>
+
+  <!-- 코러스 페이지 -->
+  <div id="chorus-page" class="page">
+    <h2>코러스 코드 진행</h2>
+    <div id="chorus-chords-list"></div>
+  </div>
+
   <script>
     const chords = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const chordProgressions = {
@@ -85,6 +111,12 @@
       'A': ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'G#dim'],
       'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#dim']
     };
+
+    const introProgressions = [
+      ['I', 'IV', 'V'],
+      ['I', 'V', 'vi', 'IV'],
+      ['vi', 'IV', 'I', 'V']
+    ];
 
     const verseProgressions = [
       ['I', 'IV', 'V'],
@@ -110,13 +142,11 @@
     function selectKey(key) {
       selectedKey = key;
       displaySelectedKey();
-      generateChordProgressions();
     }
 
     function changeCapo(amount) {
       capo += amount;
       displaySelectedKey();
-      generateChordProgressions();
     }
 
     function displaySelectedKey() {
@@ -124,19 +154,25 @@
       document.getElementById('selected-key').innerHTML = `선택한 키: ${selectedKey} (카포: ${capo} -> ${capoKey})`;
     }
 
-    function generateChordProgressions() {
-      const verseChords = getProgressionChords(verseProgressions);
-      const bridgeChords = getProgressionChords(bridgeProgressions);
-      const chorusChords = getProgressionChords(chorusProgressions);
+    function goToPage(pageId) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
 
-      displayChords('verse-chords-list', verseChords);
-      displayChords('bridge-chords-list', bridgeChords);
-      displayChords('chorus-chords-list', chorusChords);
+      if (pageId === 'intro-page') {
+        generateChordProgressions('intro-chords-list', introProgressions);
+      } else if (pageId === 'verse-page') {
+        generateChordProgressions('verse-chords-list', verseProgressions);
+      } else if (pageId === 'bridge-page') {
+        generateChordProgressions('bridge-chords-list', bridgeProgressions);
+      } else if (pageId === 'chorus-page') {
+        generateChordProgressions('chorus-chords-list', chorusProgressions);
+      }
     }
 
-    function getProgressionChords(progressionPatterns) {
+    function generateChordProgressions(elementId, progressionPatterns) {
       const keyChords = chordProgressions[selectedKey];
-      return progressionPatterns.map(pattern => {
+      const progressions = progressionPatterns.map(pattern => {
         return pattern.map(chordSymbol => {
           const degree = getDegree(chordSymbol);
           const chord = keyChords[degree - 1];
@@ -144,6 +180,8 @@
           return `${chord} (${capoChord})`;
         });
       });
+
+      displayChords(elementId, progressions);
     }
 
     function getDegree(symbol) {
