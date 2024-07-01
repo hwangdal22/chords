@@ -30,16 +30,34 @@
       background-color: #007BFF;
       color: white;
     }
+    .capo-button {
+      background-color: #28a745;
+      color: white;
+    }
     .next-button {
       background-color: #28a745;
       color: white;
       display: block;
       margin: 20px auto;
     }
+    .selected-chords {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .chord-suggestions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
   <h1>작곡 페이지</h1>
+
+  <div id="selected-chords" class="selected-chords"></div>
 
   <!-- 키 선택 페이지 -->
   <div id="select-key-page" class="page active">
@@ -77,21 +95,18 @@
   <div id="intro-page" class="page">
     <h2>인트로 코드 진행</h2>
     <div id="intro-chords-list"></div>
-    <button class="next-button" onclick="goToPage('verse-page')">다음</button>
   </div>
 
   <!-- 버스 페이지 -->
   <div id="verse-page" class="page">
     <h2>버스 코드 진행</h2>
     <div id="verse-chords-list"></div>
-    <button class="next-button" onclick="goToPage('bridge-page')">다음</button>
   </div>
 
   <!-- 브릿지 페이지 -->
   <div id="bridge-page" class="page">
     <h2>브릿지 코드 진행</h2>
     <div id="bridge-chords-list"></div>
-    <button class="next-button" onclick="goToPage('chorus-page')">다음</button>
   </div>
 
   <!-- 코러스 페이지 -->
@@ -138,20 +153,37 @@
 
     let selectedKey = '';
     let capo = 0;
+    let introChords = [];
+    let verseChords = [];
+    let bridgeChords = [];
+    let chorusChords = [];
 
     function selectKey(key) {
       selectedKey = key;
       displaySelectedKey();
+      displaySelectedChords();
     }
 
     function changeCapo(amount) {
       capo += amount;
       displaySelectedKey();
+      displaySelectedChords();
     }
 
     function displaySelectedKey() {
       const capoKey = chords[(chords.indexOf(selectedKey) + capo + 12) % 12];
       document.getElementById('selected-key').innerHTML = `선택한 키: ${selectedKey} (카포: ${capo} -> ${capoKey})`;
+    }
+
+    function displaySelectedChords() {
+      const selectedChordsDiv = document.getElementById('selected-chords');
+      selectedChordsDiv.innerHTML = `
+        <h2>선택한 코드 진행</h2>
+        <p>인트로: ${introChords.join(' - ')}</p>
+        <p>버스: ${verseChords.join(' - ')}</p>
+        <p>브릿지: ${bridgeChords.join(' - ')}</p>
+        <p>코러스: ${chorusChords.join(' - ')}</p>
+      `;
     }
 
     function goToPage(pageId) {
@@ -160,50 +192,34 @@
       document.getElementById(pageId).classList.add('active');
 
       if (pageId === 'intro-page') {
-        generateChordProgressions('intro-chords-list', introProgressions);
+        suggestNextChords('intro-chords-list', introChords);
       } else if (pageId === 'verse-page') {
-        generateChordProgressions('verse-chords-list', verseProgressions);
+        suggestNextChords('verse-chords-list', verseChords);
       } else if (pageId === 'bridge-page') {
-        generateChordProgressions('bridge-chords-list', bridgeProgressions);
+        suggestNextChords('bridge-chords-list', bridgeChords);
       } else if (pageId === 'chorus-page') {
-        generateChordProgressions('chorus-chords-list', chorusProgressions);
+        suggestNextChords('chorus-chords-list', chorusChords);
       }
     }
 
-    function generateChordProgressions(elementId, progressionPatterns) {
+    function suggestNextChords(elementId, chordList) {
       const keyChords = chordProgressions[selectedKey];
-      const progressions = progressionPatterns.map(pattern => {
-        return pattern.map(chordSymbol => {
-          const degree = getDegree(chordSymbol);
-          const chord = keyChords[degree - 1];
-          const capoChord = chords[(chords.indexOf(chord) + capo + 12) % 12];
-          return `${chord} (${capoChord})`;
-        });
-      });
+      const lastChord = chordList[chordList.length - 1];
+      const suggestions = lastChord ? keyChords.filter(chord => chord !== lastChord) : keyChords;
 
-      displayChords(elementId, progressions);
-    }
-
-    function getDegree(symbol) {
-      switch (symbol) {
-        case 'I': return 1;
-        case 'ii': return 2;
-        case 'iii': return 3;
-        case 'IV': return 4;
-        case 'V': return 5;
-        case 'vi': return 6;
-        case 'vii': return 7;
-        default: return 1;
-      }
-    }
-
-    function displayChords(elementId, progressions) {
       const element = document.getElementById(elementId);
       element.innerHTML = '';
-      progressions.forEach(progression => {
-        const progressionElement = document.createElement('div');
-        progressionElement.textContent = progression.join(' - ');
-        element.appendChild(progressionElement);
+      suggestions.forEach(chord => {
+        const capoChord = chords[(chords.indexOf(chord) + capo + 12) % 12];
+        const button = document.createElement('button');
+        button.className = 'key-button';
+        button.textContent = `${chord} (${capoChord})`;
+        button.onclick = () => {
+          chordList.push(chord);
+          displaySelectedChords();
+          suggestNextChords(elementId, chordList);
+        };
+        element.appendChild(button);
       });
     }
   </script>
